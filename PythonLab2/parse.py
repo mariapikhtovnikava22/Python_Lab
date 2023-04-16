@@ -2,11 +2,9 @@ from constants import*
 from re import sub, findall, split
 from help_func import*
 
-from collections import OrderedDict
 def clear_points(test_str):
     res = sub(ThreeSigns, lambda match: match.group(1)[0], test_str)
     return res
-
 # Функция для замены точки на пробел
 def replace_dot_with_space(match):
     return match.group(0).replace('.', ' ')
@@ -14,8 +12,9 @@ def clear_num(test_str):
     res = sub(numbers_pattern, replace_dot_with_space, test_str)
     return res
 def clear_other(test_str):
-
-    res = findall(other_abbreviate, test_str)
+    # res = findall(other_abbreviate, test_str)
+    # print(res)
+    res = sub(other_abbreviate, replace_dot_with_space, test_str)
     if not res:
         return []
     return res
@@ -23,54 +22,81 @@ def clear_abbrev(test_str):
 
     result = clear_num(test_str)
     points = clear_points(result)
-    res = findall(Abbreviate, points) + clear_other(points)
+    other = clear_other(points)
+    res = findall(Abbreviate, other)
     resul = change_list(res, r"\.", ' ')
-    result = change_str(resul, points, res)
+    result = change_str(resul, other, res)
+    # print(result)
     result = sub(r"\n", "", result)
     return result
+def get_user_inp():
+    test_str = ''
+
+    print("Please enter a text(enter 'стоп' to complete): ")
+
+    while True:
+        line = input()
+        if not line:  # Проверяем, что строка пустая
+            print("You have not entered the text please try again.")
+            continue
+        if line == "стоп":
+            break
+        test_str += line + "\n"
+
+    return test_str
+def parse():
+
+    test_str = get_user_inp()
+
+    if not len(test_str):
+        print("You didn't enter anything :(")
+        print(f"Col of declarative sentences: 0\n"
+              f"Col of non-declarative sentences: 0")
+        print(f"Average length of the sentence in characters(words count only): 0\n"
+              f"Average length of the word in the text in characters: 0")
+        return
+
+    test_str = clear_abbrev(test_str)
+
+    dcol = len(DeclarativeSentences(test_str)) - 1
+    ncol = len(NonDeclarativeSentences(test_str)) - 1
+    if dcol+ncol == 0:
+        print("You have not entered a single sentence")
+        return
+    else:
+        print(f"Col of declarative sentences: {dcol}\n"
+              f"Col of non-declarative sentences: {ncol}")
+        av_len_sent, aver_len_word = average_len(test_str)
+        print(f"Average length of the sentence in characters(words count only): {av_len_sent}\n"
+              f"Average length of the word in the text in characters: {aver_len_word}")
+        k = input("Enter top size: ")
+        n = input("Enter the number of top: ")
+        ngrams(test_str, n, k)
+
+
 
 def DeclarativeSentences(test_str):
-    col = split(r"\.", test_str)
-    return col
-
+    sentence = split(r"\.", test_str)
+    print(sentence)
+    return sentence
 def NonDeclarativeSentences(test_str):
-    col = split(r"\!|\?", test_str)
-    return col
-
-def find_word(test_str):
-    res = findall(word_pattern, test_str)
-    return res
-
+    sentence = split(r"\!|\?", test_str)
+    print(sentence)
+    return sentence
 def average_len(test_str):
 
-    list_of_col = []
-    col_of_word = 0
-    len_symbols = 0
-
     sentence = split(r"\.|\!|\?", test_str)
-    sentence = sentence[:-1] #срез
+    sentence = sentence[:-1]#срез
 
-    for r in sentence:
-        col_word = find_word(r) #список слов в 1-м предложении
-        for w in col_word:
-            len_symbols += len(w)
-        #list_of_col.append(col_word)
-        col_of_word += len(col_word)
+    col_of_word = Col_of_word(sentence)
+    len_symbols = len_symb(sentence)
+    print(f"Number of words in the text: {col_of_word}")
 
-    print(col_of_word)
-    # print(list_of_col)
-    print(len_symbols)
-    print(len(sentence))
-    aver_len_sentence = len_symbols/len(sentence)
-    # print(list_of_col)
+    print(f"Number of symbols in the text: {len_symbols}")
 
-    aver_len_word = len_symbols/col_of_word
+    aver_len_sentence = len_symbols / len(sentence)
+    aver_len_word = len_symbols / col_of_word
     return aver_len_sentence, aver_len_word
-
-def clear_direct_speech(test_str):
-
-    res = findall(direct_speech_pat, test_str)
-
 
 def ngrams(test_str, n, k):
 
@@ -87,13 +113,6 @@ def ngrams(test_str, n, k):
             break
 
     print(list_of_ngram)
-
-    ''' 
-    Создаем словарь, где ключ список n-грамм, значение кол-во ее вхождений в тексте
-    потом сортируем его и выводим последовательность 
-    
-    
-    '''
 
     dict_of_ngram = {}
 
@@ -114,6 +133,8 @@ def ngrams(test_str, n, k):
     key_help = ""
 
     while k:
+        if len(dict_of_ngram) == 0:
+            break
         for key, value in dict_of_ngram.items():
             if maximum < value:
                 maximum = value
@@ -125,6 +146,7 @@ def ngrams(test_str, n, k):
         k -= 1
 
     print(res_dict)
+
 
     
 
