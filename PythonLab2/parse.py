@@ -2,14 +2,22 @@ from constants import *
 from re import sub, findall, split
 from help_func import *
 
-def clear_points(test_str):
+
+def clear_many_signs(test_str):
+    print(findall(ThreeSigns, test_str))
     res = sub(ThreeSigns, lambda match: match.group(1)[0], test_str)
     return res
+
+
 def replace_dot_with_space(match):
     return match.group(0).replace('.', ' ')
+
+
 def clear_num(test_str):
     res = sub(numbers_pattern, replace_dot_with_space, test_str)
     return res
+
+
 def clear_other(test_str):
     # res = findall(other_abbreviate, test_str)
     # print(res)
@@ -17,9 +25,11 @@ def clear_other(test_str):
     if not res:
         return []
     return res
+
+
 def clear_abbrev(test_str):
     result = clear_num(test_str)
-    points = clear_points(result)
+    points = clear_many_signs(result)
     other = clear_other(points)
     res = findall(Abbreviate, other)
     resul = change_list(res, r"\.", ' ')
@@ -27,6 +37,8 @@ def clear_abbrev(test_str):
     # print(result)
     # result = sub(r"\n", "", result)
     return result
+
+
 def get_user_inp():
     test_str = ''
 
@@ -42,6 +54,8 @@ def get_user_inp():
         test_str += line + "\n"
 
     return test_str
+
+
 def input_num():
     while True:
         # input_str = input()
@@ -54,9 +68,11 @@ def input_num():
         except ValueError:
             print("Error! You didn't enter a number. Try again!!!")
     return num
+
+
 def print_empty_parse():
     print(f"Col of declarative sentences: 0\n"
-         f"Col of non-declarative sentences: 0")
+          f"Col of non-declarative sentences: 0")
     print(f"Average length of the sentence in characters(words count only): 0\n"
           f"Average length of the word in the text in characters: 0")
 def parser():
@@ -98,12 +114,18 @@ def parser():
         n = input_num()
         ngrams(test_str, n, k)
         return
+
+
 def DeclarativeSentences(test_str):
     sentence = split(r"\.", test_str)
     return sentence
+
+
 def NonDeclarativeSentences(test_str):
     sentence = split(r"\!|\?", test_str)
     return sentence
+
+
 def average_len(test_str):
     sentence = split(r"\.|\!|\?", test_str)
     sentence = sentence[:-1]  # срез
@@ -118,6 +140,8 @@ def average_len(test_str):
     aver_len_sentence = len_symbols / len(sentence)
     aver_len_word = len_symbols / col_of_word
     return aver_len_sentence, aver_len_word
+
+
 def ngrams(test_str, n, k):
     res_dict = Top_Ngram(test_str, n, k)
     print(res_dict)

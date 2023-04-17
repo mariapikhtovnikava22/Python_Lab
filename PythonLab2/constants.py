@@ -7,10 +7,10 @@ other_abbreviate = r"\b\d{,2}(i\.e|e\.g\.|etc\.|ect\.|p\.a\.|a\.m\.|p\.m\.|P\.S\
                    r"Mon\.|Tues\.|Wed\.|Thurs\.|Fri\.|Sat.\|Sun\.|" + \
                    r"\.com|\.ru|\.by|\.cpp|\.cs|\.txt|\.py)(?!\s*[A-Z])"
 
-ThreeSigns = r"(\.\s*|\!\s*|\?\s*)+"
+ThreeSigns = r"((?:\.\s*|\!\s*|\?\s*)+)"
 
 numbers_pattern = r"\b\d+(\.)\d+\b"
 
 word_pattern = r"\b\d*[a-zA-Z]+\d*\w*\b"
 
-#direct_speech_pat = r'"([^"]*)"'
+# direct_speech_pat = r'"([^"]*)"'
