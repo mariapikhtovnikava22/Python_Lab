@@ -2,7 +2,6 @@ from parse import parser, clear_many_signs
 from re import findall
 from container import Container
 
-
 # parser()
 
 # s = "Cool! Do this . . . Clear!!!"
@@ -14,10 +13,9 @@ from container import Container
 # print(s)
 
 h1 = Container(2, 3, 4, 5)
-h1.add("Sol", 4, 7)
-res = h1.grep(r"4")
-print(res)
+h2 = Container(3, 5, 6, 7)
 
-print(h1.get_List_elements())
+print(h1.__iadd__(h2))
 
+# print(h1.get_List_elements())
 

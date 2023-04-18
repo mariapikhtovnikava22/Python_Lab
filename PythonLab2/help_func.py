@@ -61,7 +61,7 @@ def make_dict_ofNgram(test_str, n):
                 dict_of_ngram.update({str(list_of_ngram[i]): num_of_repetit})
         num_of_repetit = 0
 
-    print(f"List of ngrams and how many times this ngrams occur\n {dict_of_ngram}")
+    print(f"List of ngrams and how many times this ngrams occur\n{dict_of_ngram}")
     return dict_of_ngram
 
 

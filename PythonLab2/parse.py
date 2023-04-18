@@ -4,7 +4,7 @@ from help_func import *
 
 
 def clear_many_signs(test_str):
-    print(findall(ThreeSigns, test_str))
+    # print(findall(ThreeSigns, test_str))
     res = sub(ThreeSigns, lambda match: match.group(1)[0], test_str)
     return res
 
@@ -35,7 +35,7 @@ def clear_abbrev(test_str):
     resul = change_list(res, r"\.", ' ')
     result = change_str(resul, other, res)
     # print(result)
-    # result = sub(r"\n", "", result)
+    result = sub(r"\n", "", result)
     return result
 
 
@@ -49,7 +49,7 @@ def get_user_inp():
         if not line:  # Проверяем, что строка пустая
             print("You have not entered the text please try again.")
             continue
-        if line == "стоп":
+        if line.lower() == "стоп":
             break
         test_str += line + "\n"
 
@@ -75,6 +75,8 @@ def print_empty_parse():
           f"Col of non-declarative sentences: 0")
     print(f"Average length of the sentence in characters(words count only): 0\n"
           f"Average length of the word in the text in characters: 0")
+
+
 def parser():
     test_str = get_user_inp()
 
@@ -94,7 +96,7 @@ def parser():
         return
 
     else:
-        if find_word(test_str):
+        if not find_word(test_str):
             print("Your text does not contain a single word!")
             print(f"Number of words in the text: 0")
             print(f"Number of symbols in the text: 0")
@@ -103,7 +105,7 @@ def parser():
 
         print(f"Col of declarative sentences: {dcol}\n"
               f"Col of non-declarative sentences: {ncol}")
-        print(test_str)
+        # print(test_str)
         av_len_sent, aver_len_word = average_len(test_str)
         print(f"Average length of the sentence in characters(words count only): {av_len_sent}\n"
               f"Average length of the word in the text in characters: {aver_len_word}")
