@@ -1,7 +1,7 @@
 from constants import *
 from re import sub, findall, split
 from help_func import *
-
+from for_input import input_, get_user_inp
 
 def clear_many_signs(test_str):
     # print(findall(ThreeSigns, test_str))
@@ -37,38 +37,6 @@ def clear_abbrev(test_str):
     # print(result)
     result = sub(r"\n", "", result)
     return result
-
-
-def get_user_inp():
-    test_str = ''
-
-    print("Please enter a text(enter 'стоп' to complete): ")
-
-    while True:
-        line = input()
-        if not line:  # Проверяем, что строка пустая
-            print("You have not entered the text please try again.")
-            continue
-        if line.lower() == "стоп":
-            break
-        test_str += line + "\n"
-
-    return test_str
-
-
-def input_num():
-    while True:
-        # input_str = input()
-        try:
-            num = int(input())
-            if num < 0:
-                print("Please enter a positive number!!!")
-            else:
-                break
-        except ValueError:
-            print("Error! You didn't enter a number. Try again!!!")
-    return num
-
 
 def print_empty_parse():
     print(f"Col of declarative sentences: 0\n"
@@ -111,9 +79,9 @@ def parser():
               f"Average length of the word in the text in characters: {aver_len_word}")
 
         print("Enter top size: ")
-        k = input_num()
+        k = input_(int)
         print("Enter the number of top: ")
-        n = input_num()
+        n = input_(int)
         ngrams(test_str, n, k)
         return
 
