@@ -14,15 +14,15 @@ list_commands = "Switch command(only number of command):\n" \
                    "5)   Find by regular expression\n" \
                    "6)   Get list elements of current container\n" \
                    "7)   Switch user\n" \
-                   "8)   Load\n" \
-                   "9)   Save\n" \
+                   "8)   Load from file\n" \
+                   "9)   Save to file\n" \
                    "10)  Exit\n"
 
 print(list_commands)
 
 while True:
 
-    n = input_(int)
+    n = input_(int, "Switch command: ")
     match n:
 
         case 1:
@@ -84,10 +84,12 @@ while True:
         case 8:
             user.load_user()
             user.load_Container()
+            print("Container successful load from file!!!")
 
         case 9:
             user.save_Container()
             user.save_user()
+            print("Container successful save to file!!!")
 
         case 10:
             while True:
