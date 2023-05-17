@@ -55,8 +55,6 @@ def mult_input(mess):
     for i in input(mess).split():
         arr.append(i)
     return arr
-
-
 class Switch(Enum):
     sw1 = "ADD USER"
     sw2 = "ADD ELEMENTS"

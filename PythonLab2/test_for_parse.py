@@ -1,6 +1,4 @@
 import unittest
-
-from help_func import find_word
 from parse import clear_abbrev, clear_num, clear_many_signs,\
     DeclarativeSentences, NonDeclarativeSentences, average_len, \
     make_list_of_ngrams, Top_Ngram, find_word, Col_of_word, len_symb

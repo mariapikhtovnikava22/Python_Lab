@@ -38,6 +38,9 @@ def make_list_of_ngrams(test_str, n):
 
     else:
         lst_word = [x.lower() for x in find_word(test_str)]
+
+        if n > len(lst_word):
+            return []
         # print(lst_word)
         for i, r in enumerate(lst_word):
 
@@ -51,6 +54,8 @@ def make_list_of_ngrams(test_str, n):
 
 def make_dict_ofNgram(test_str, n):
     list_of_ngram = make_list_of_ngrams(test_str, n)
+    if len(list_of_ngram) == 0:
+        return {}
     dict_of_ngram = {}
     num_of_repetit = 0
 
@@ -72,6 +77,10 @@ def Top_Ngram(test_str, n, k):
         return
 
     dict_of_ngram = make_dict_ofNgram(test_str, n)
+
+    if len(dict_of_ngram) == 0:
+        return {}
+
     res_dict = {}
 
     maximum = 0

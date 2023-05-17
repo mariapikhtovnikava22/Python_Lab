@@ -3,6 +3,7 @@ from re import sub, findall, split
 from help_func import *
 from for_input import input_, get_user_inp
 
+
 def clear_many_signs(test_str):
     # print(findall(ThreeSigns, test_str))
     res = sub(ThreeSigns, lambda match: match.group(1)[0], test_str)
@@ -38,6 +39,7 @@ def clear_abbrev(test_str):
     result = sub(r"\n", "", result)
     return result
 
+
 def print_empty_parse():
     print(f"Col of declarative sentences: 0\n"
           f"Col of non-declarative sentences: 0")
@@ -45,8 +47,10 @@ def print_empty_parse():
           f"Average length of the word in the text in characters: 0")
 
 
-def parser():
-    test_str = get_user_inp()
+def parser(test_str=None):
+
+    if not test_str:
+        test_str = get_user_inp()
 
     if not len(test_str):
         print("You didn't enter anything :(")
@@ -114,4 +118,26 @@ def average_len(test_str):
 
 def ngrams(test_str, n, k):
     res_dict = Top_Ngram(test_str, n, k)
+    if len(res_dict) == 0:
+        print("The number of partitions into grams is greater than the number of words!!!")
+        return
     print(res_dict)
+
+
+if __name__ == "__main__":
+
+    s = """Hello, my dear! How is dear Mrs.Smith? I wanted to tell you about my trip to Bali with Mr.Bean. 
+    It was unrealistically cool. . . He spent the whole trip talking about his fascinating work.
+    It was noticeable how much he loved her, especially after his phrase: "It's like I'm on vacation there."
+    He also gave me a couple of tips on taking care of my health, this concerns regular examinations, observing the sleep regime, 
+    getting up no later than 7a.m. and going to bed no later than 11p.m., etc.
+    And he also recommended me a doctor whom he considers the best in his field and this is Dr.Less, she knows a lot and will always help.
+    So if something bothers you, just email her docles@gmail.com or docless@mail.ru . 
+    While we were traveling with him, he told me about such famous people as Mr.Alonso and Mrs.Kramon. 
+    When we see you live, I will definitely tell you more about them. 
+    I have attached an envelope with money to this letter, there is enough for you to buy medicines, food, clothes, etc., and whatever your heart desires. 
+    Be healthy and happy. With love, Mr. Gilbert ! ! !"""
+
+    parser(s)
+
+
