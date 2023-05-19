@@ -1,14 +1,18 @@
 from json_serelalizator import JsonSerelizator
-import json
+from math import sqrt
 
-s = 5
-
-
+from constants import*
+k = 5
 def my_function():
     x = 10
     y = 20
-    return x + y
+    return x + y - k
 
 
 a = JsonSerelizator()
-print(a.dumps(my_function))
+
+b = a.dumps(my_function)
+v = a.loads(b)
+
+
+print(v())
