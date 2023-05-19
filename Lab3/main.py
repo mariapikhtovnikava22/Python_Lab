@@ -1,9 +1,14 @@
 from json_serelalizator import JsonSerelizator
-a = 5
-b = None
+import json
 
-d = JsonSerelizator()
-
-print(d.dumps(b))
+s = 5
 
 
+def my_function():
+    x = 10
+    y = 20
+    return x + y
+
+
+a = JsonSerelizator()
+print(a.dumps(my_function))
