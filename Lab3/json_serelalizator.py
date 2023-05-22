@@ -1,7 +1,8 @@
+import inspect
 import types
 from re import search
 from constants import PRIMITIVE_COLLECTIONS, PRIMITIVE_DATA, PRIMITIVE_TYPE, CODE_OBJ
-from inspect import getmembers, iscode
+from inspect import getmembers, isroutine, ismethod, isfunction
 
 
 def get_name_of_PrimType(obj_type):
@@ -13,22 +14,67 @@ class JsonSerelizator:
         inf = dict()
         if isinstance(obj, PRIMITIVE_DATA):
             return self.serelization_PrimType(obj)
-        if isinstance(obj, types.FunctionType):
+        if isroutine(obj):
             inf['type'] = 'function'
             inf['value'] = self.serelization_Func(obj)
             return inf
-        if iscode(obj):
+        elif isinstance(obj, types.CodeType):
             inf['type'] = 'code'
-            args = {k: self.dumps(v) for (k, v) in getmembers(obj.__code__) if k in CODE_OBJ}
+            args = {k: self.dumps(v) for (k, v) in getmembers(obj) if k in CODE_OBJ}
             inf["value"] = args
+            return inf
+        elif isinstance(obj, types.ModuleType):
+            inf['type'] = 'module'
+            inf['value'] = self.dumps(obj.__name__)
+            return inf
+        elif isinstance(obj, types.CellType):
+            inf['type'] = 'cell'
+            inf['value'] = self.dumps(obj.cell_contents)
+            return inf
+        # elif isinstance(obj, types.GeneratorType):
+        #     inf['type'] = 'generator'
+        #     inf['value'] =
+
+        elif inspect.isclass(obj):
+            inf['type'] = 'class'
+            inf['value'] = self.serealize_Class(obj)
+
         elif not obj:
             inf["type"] = "NoneType"
-            inf["value"] = None
+            inf["value"] = 'null'
             return inf
-        else:
-            inf["type"] = "NoneType"
-            inf["value"] = None
+
+    def serealize_Class(self, obj):
+        inf = dict()
+        inf['__name__'] = self.dumps(obj.__name__)
+
+        for v in getmembers(obj):
+            if (v[0] in ("__name__", "__base__", "__bases__",
+                              "__basicsize__", "__dictoffset__", "__class__") or
+                    type(v[1]) in (
+                            types.WrapperDescriptorType,
+                            types.MethodDescriptorType,
+                            types.BuiltinFunctionType,
+                            types.GetSetDescriptorType,
+                            types.MappingProxyType
+                    )):
+                continue
+            if ismethod(v[1]):
+                inf[v[0]] = self.serelization_Func(v[1].__func__, obj)
+                # видимо, декоратор - не метод)
+            elif inspect.isfunction(v[1]):
+                inf[v[0]] = {"type": "function", "value": self.serelization_Func(v[1], obj)}
+            else:
+                # print(member[0])
+                # k = input()
+                # if(k == "e"):
+                # return
+                inf[v[0]] = self.dumps((v[1]))
+
+            inf["__bases__"] = self.dumps(tuple(self.serealize_Class(base) for base in obj.__bases__ if base != object))
+
             return inf
+
 
     def serelization_PrimType(self, obj):
         inf = dict()
@@ -40,11 +86,16 @@ class JsonSerelizator:
 
         elif isinstance(obj, dict):
             inf["type"] = get_name_of_PrimType(obj_type)
-            inf["value"] = [[self.dumps(key), self.dumps(value)] for (key, value) in obj.items()]
+            inf["value"] = [self.dumps([key, value]) for (key, value) in obj.items()]
 
         elif isinstance(obj, PRIMITIVE_TYPE):
             inf["type"] = get_name_of_PrimType(obj_type)
             inf["value"] = obj
+
+        elif isinstance(obj, types.ModuleType):
+            inf['type'] = 'module'
+            inf['value'] = self.dumps(obj.__name__)
+            return inf
 
         elif not obj:
             inf["type"] = "NoneType"
@@ -61,7 +112,13 @@ class JsonSerelizator:
         inf = dict()
         inf["__name__"] = obj.__name__
         inf["__globals__"] = self.glob_vars(obj)
-        args = {k: self.dumps(v) for (k, v) in getmembers(obj.__code__) if k in CODE_OBJ}
+
+        args = dict()
+
+        for k, v in getmembers(obj.__code__):
+            if k in CODE_OBJ:
+                args[k] = self.dumps(v)
+
         inf["__code__"] = args
 
         if obj.__closure__:
@@ -93,6 +150,10 @@ class JsonSerelizator:
             return self.get_collection(obj['type'], obj['value'])
         elif obj['type'] == 'function':
             return self.deser_func(obj['value'])
+        elif obj['type'] == 'dict':
+            return dict(self.get_collection('list', obj['value']))
+        elif obj['type'] == 'module':
+            return __import__(obj['value'])
         elif obj['type'] == 'code':
             code = obj['value']
             return types.CodeType(self.loads(code["co_argcount"]),
@@ -111,6 +172,8 @@ class JsonSerelizator:
                                   self.loads(code["co_lnotab"]),
                                   self.loads(code["co_freevars"]),
                                   self.loads(code["co_cellvars"]))
+        elif obj['type'] == 'cell':
+            return types.CellType(self.dumps(obj['value']))
 
     def get_PrimType(self, obj, typee):
         if typee == 'int':
@@ -143,6 +206,7 @@ class JsonSerelizator:
         code = obj['__code__']
         globalss = obj['__globals__']
         glob_in_func = dict()
+        closuree = obj['__closure__']
 
         for v in globalss:
 
@@ -151,6 +215,8 @@ class JsonSerelizator:
 
             elif globalss[v] != obj["__name__"]:
                 glob_in_func[v] = self.loads(globalss[v])
+
+        closur = tuple(self.loads(closuree))
 
         codeType = types.CodeType(self.loads(code["co_argcount"]),
                                   self.loads(code["co_posonlyargcount"]),
@@ -169,8 +235,7 @@ class JsonSerelizator:
                                   self.loads(code["co_freevars"]),
                                   self.loads(code["co_cellvars"]))
 
-        Func_Obj = types.FunctionType(code=codeType, globals=glob_in_func)
+        Func_Obj = types.FunctionType(code=codeType, globals=glob_in_func, closure=closur)
         Func_Obj.__globals__.update({Func_Obj.__name__: Func_Obj})
 
         return Func_Obj
-

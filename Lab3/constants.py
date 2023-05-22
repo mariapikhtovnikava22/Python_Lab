@@ -1,6 +1,6 @@
 PRIMITIVE_TYPE = (str, int, bool, float, complex)
 PRIMITIVE_COLLECTIONS = (list, tuple, bytearray, set, bytes, frozenset)
-PRIMITIVE_DATA = (PRIMITIVE_COLLECTIONS, PRIMITIVE_TYPE)
+PRIMITIVE_DATA = (PRIMITIVE_COLLECTIONS, PRIMITIVE_TYPE, dict)
 CODE_OBJ = ("co_argcount",         # number of arguments (not including keyword only arguments, * or **args)
             "co_posonlyargcount",  #
             "co_kwonlyargcount",   # number of keyword only arguments (not including ** arg)
