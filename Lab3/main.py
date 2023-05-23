@@ -1,8 +1,9 @@
-from json_serelalizator import JsonSerelizator
+from json_serealazer import JsonSerelizator
 import math
 from inspect import getmembers
 
 from constants import *
+import json
 
 
 # k = 5
@@ -18,11 +19,33 @@ def my_function():
 
 l = lambda n: n + 25
 
+
+m = 5
+n = 3
+def sums():
+    return m + n
+
+
+class A:
+    a = 5
+    b = 6
+    def sum(self):
+        return self.a + self.b
+
+
 a = JsonSerelizator()
 # print(a.dumps(dictor))
 # print(a.loads(a.dumps(dictor)))
 # print(my_function())
-b = a.dumps(my_function)
+b = a.dumps(A)
 print(b)
-f = a.loads(b)
-print(f())
+# f = a.loads(b)
+# d = f()
+
+g = A()
+
+print(g.sum())
+
+
+print(sums())
+

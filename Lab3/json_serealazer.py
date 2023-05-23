@@ -1,8 +1,9 @@
 import inspect
 import types
 from re import search
-from constants import PRIMITIVE_COLLECTIONS, PRIMITIVE_DATA, PRIMITIVE_TYPE, CODE_OBJ
-from inspect import getmembers, isroutine, ismethod, isfunction
+from constants import PRIMITIVE_COLLECTIONS, PRIMITIVE_DATA, PRIMITIVE_TYPE,\
+    CODE_OBJ, PRIMITIVE_COLLECTIONS_STR, PRIMITIVE_TYPE_STR
+from inspect import getmembers, isroutine, ismethod, isfunction, isclass
 
 
 def get_name_of_PrimType(obj_type):
@@ -35,13 +36,13 @@ class JsonSerelizator:
         #     inf['type'] = 'generator'
         #     inf['value'] =
 
-        elif inspect.isclass(obj):
+        elif isclass(obj):
             inf['type'] = 'class'
             inf['value'] = self.serealize_Class(obj)
-
+            return inf
         elif not obj:
             inf["type"] = "NoneType"
-            inf["value"] = 'null'
+            inf["value"] = 'Null'
             return inf
 
     def serealize_Class(self, obj):
@@ -62,7 +63,7 @@ class JsonSerelizator:
             if ismethod(v[1]):
                 inf[v[0]] = self.serelization_Func(v[1].__func__, obj)
                 # видимо, декоратор - не метод)
-            elif inspect.isfunction(v[1]):
+            elif isfunction(v[1]):
                 inf[v[0]] = {"type": "function", "value": self.serelization_Func(v[1], obj)}
             else:
                 # print(member[0])
@@ -71,10 +72,9 @@ class JsonSerelizator:
                 # return
                 inf[v[0]] = self.dumps((v[1]))
 
-            inf["__bases__"] = self.dumps(tuple(self.serealize_Class(base) for base in obj.__bases__ if base != object))
+        inf["__bases__"] = self.dumps(tuple(self.serealize_Class(base) for base in obj.__bases__ if base != object))
 
-            return inf
-
+        return inf
 
     def serelization_PrimType(self, obj):
         inf = dict()
@@ -107,11 +107,11 @@ class JsonSerelizator:
 
         return inf
 
-    def serelization_Func(self, obj):
+    def serelization_Func(self, obj, cls=None):
 
         inf = dict()
         inf["__name__"] = obj.__name__
-        inf["__globals__"] = self.glob_vars(obj)
+        inf["__globals__"] = self.glob_vars(obj, cls)
 
         args = dict()
 
@@ -128,7 +128,7 @@ class JsonSerelizator:
 
         return inf
 
-    def glob_vars(self, obj):
+    def glob_vars(self, obj, cls=None):
 
         global_vars = dict()
 
@@ -136,6 +136,9 @@ class JsonSerelizator:
             if glob in obj.__globals__:
                 if isinstance(obj.__globals__[glob], types.ModuleType):
                     global_vars["module " + glob] = self.dumps(obj.__globals__[glob].__name__)
+                elif isclass(obj.__globals__[glob]):
+                    if (cls and obj.__globals__[glob] != cls) or (not cls):
+                        glob[glob] = self.dumps(obj.__globals__[glob])
                 elif glob != obj.__code__.co_name:
                     global_vars[glob] = self.dumps(obj.__globals__[glob])
                 else:
@@ -144,9 +147,9 @@ class JsonSerelizator:
         return global_vars
 
     def loads(self, obj):
-        if obj['type'] in str(PRIMITIVE_TYPE):
+        if obj['type'] in PRIMITIVE_TYPE_STR:
             return self.get_PrimType(obj['value'], obj['type'])
-        elif obj['type'] in str(PRIMITIVE_COLLECTIONS):
+        elif obj['type'] in PRIMITIVE_COLLECTIONS_STR:
             return self.get_collection(obj['type'], obj['value'])
         elif obj['type'] == 'function':
             return self.deser_func(obj['value'])
@@ -174,6 +177,8 @@ class JsonSerelizator:
                                   self.loads(code["co_cellvars"]))
         elif obj['type'] == 'cell':
             return types.CellType(self.dumps(obj['value']))
+        elif obj['type'] == 'class':
+            return self.deser_class(obj['value'])
 
     def get_PrimType(self, obj, typee):
         if typee == 'int':
@@ -239,3 +244,22 @@ class JsonSerelizator:
         Func_Obj.__globals__.update({Func_Obj.__name__: Func_Obj})
 
         return Func_Obj
+
+    def deser_class(self, obj):
+        bases = self.loads(obj["__bases__"])
+        members = dict()
+
+        for member, value in obj.items():
+            # print(member, value)
+            members[member] = self.loads(value)
+
+        clas = type(self.loads(obj["__name__"]), bases, members)
+
+        # чтоб не было бесконечной рекурсии метода и класса
+        for k, member in members.items():
+            if isinstance(member, types.FunctionType):
+                member.__globals__.update({clas.__name__: clas})
+
+        return clas
+        
+
