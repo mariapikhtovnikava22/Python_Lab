@@ -5,47 +5,45 @@ from inspect import getmembers
 from constants import *
 import json
 
+def my_decorator(func):
+    def wrapper(*args, **kwargs):
+        print("func start")
+        res = func(*args, **kwargs)
+        print("Func end")
+        return res
+    return wrapper
 
-# k = 5
-# dictor = {'do': 1, 'cos': 3}
-def my_function():
-    def go():
-        x = 10
-        y = (20)
-        return x + y
-
-    return go()
-
-
-l = lambda n: n + 25
-
-
-m = 5
-n = 3
-def sums():
-    return m + n
-
-
+X = 12
 class A:
-    a = 5
-    b = 6
-    def sum(self):
-        return self.a + self.b
+    bob = "sinii"
+
+    @staticmethod
+    def ret_bob():
+        return A.bob
+
+    def my_method(self, x):
+        return x + 5
+
+class B:
+    @staticmethod
+    @my_decorator
+    def another_method(k):
+        print("Hi:)")
+        return math.sin(k * X)
+
+class C(A, B):
+    def __init__(self):
+        self.coca = "Cola"
 
 
 a = JsonSerelizator()
-# print(a.dumps(dictor))
-# print(a.loads(a.dumps(dictor)))
-# print(my_function())
-b = a.dumps(A)
-print(b)
-# f = a.loads(b)
-# d = f()
 
-g = A()
+f = C()
 
-print(g.sum())
+f_ser = a.dumps(f)
+print(f_ser)
+f_deser = a.loads(f_ser)
+print(f_deser.my_method(5))
 
 
-print(sums())
 

@@ -32,6 +32,7 @@ class JsonSerelizator:
             inf['type'] = 'cell'
             inf['value'] = self.dumps(obj.cell_contents)
             return inf
+
         # elif isinstance(obj, types.GeneratorType):
         #     inf['type'] = 'generator'
         #     inf['value'] =
@@ -44,13 +45,34 @@ class JsonSerelizator:
             inf["type"] = "NoneType"
             inf["value"] = 'Null'
             return inf
+        else:
+            inf['type'] = 'object'
+            inf['value'] = self.serelization_Obj(obj)
+            return inf
+
+    def serelization_Obj(self, obj):
+
+        inf = dict()
+        inf['__class__'] = self.dumps(obj.__class__)
+        members = dict()
+
+        for k, v in getmembers(obj):
+            if k.startswith("__") or isfunction(v) or ismethod(v):
+                continue
+
+            members[k] = self.dumps(v)
+
+        inf['__members__'] = members
+
+        return inf
 
     def serealize_Class(self, obj):
         inf = dict()
         inf['__name__'] = self.dumps(obj.__name__)
 
-        for v in getmembers(obj):
-            if (v[0] in ("__name__", "__base__", "__bases__",
+        for ve in obj.__dict__:
+            v = [ve, obj.__dict__[ve]]
+            if (v[0] in ("__name__", "__base__",
                               "__basicsize__", "__dictoffset__", "__class__") or
                     type(v[1]) in (
                             types.WrapperDescriptorType,
@@ -60,19 +82,24 @@ class JsonSerelizator:
                             types.MappingProxyType
                     )):
                 continue
-            if ismethod(v[1]):
+
+            if isinstance(obj.__dict__[v[0]], staticmethod) and v[1].__func__ is not None:
+                inf[v[0]] = {"type": "staticmethod",
+                                  "value": {"type": "function",
+                                            "value": self.serelization_Func(v[1].__func__, obj)}}
+            elif isinstance(obj.__dict__[v[0]], classmethod) and v[1].__func__ is not None:
+                inf[v[0]] = {"type": "classmethod",
+                                  'value': {"type": "function",
+                                            "value": self.serelization_Func(v[1].__func__, obj)}}
+            elif ismethod(v[1]):
                 inf[v[0]] = self.serelization_Func(v[1].__func__, obj)
-                # видимо, декоратор - не метод)
+
             elif isfunction(v[1]):
                 inf[v[0]] = {"type": "function", "value": self.serelization_Func(v[1], obj)}
             else:
-                # print(member[0])
-                # k = input()
-                # if(k == "e"):
-                # return
                 inf[v[0]] = self.dumps((v[1]))
 
-        inf["__bases__"] = self.dumps(tuple(self.serealize_Class(base) for base in obj.__bases__ if base != object))
+        inf["__bases__"] = {'type': 'tuple', 'value': [self.dumps(base) for base in obj.__bases__ if base != object]}
 
         return inf
 
@@ -92,22 +119,11 @@ class JsonSerelizator:
             inf["type"] = get_name_of_PrimType(obj_type)
             inf["value"] = obj
 
-        elif isinstance(obj, types.ModuleType):
-            inf['type'] = 'module'
-            inf['value'] = self.dumps(obj.__name__)
-            return inf
-
-        elif not obj:
-            inf["type"] = "NoneType"
-            inf["value"] = None
-
-        else:
-            inf["type"] = "NoneType"
-            inf["value"] = None
-
         return inf
 
     def serelization_Func(self, obj, cls=None):
+        if not inspect.isfunction(obj):
+            return
 
         inf = dict()
         inf["__name__"] = obj.__name__
@@ -138,7 +154,7 @@ class JsonSerelizator:
                     global_vars["module " + glob] = self.dumps(obj.__globals__[glob].__name__)
                 elif isclass(obj.__globals__[glob]):
                     if (cls and obj.__globals__[glob] != cls) or (not cls):
-                        glob[glob] = self.dumps(obj.__globals__[glob])
+                        global_vars[glob] = self.dumps(obj.__globals__[glob])
                 elif glob != obj.__code__.co_name:
                     global_vars[glob] = self.dumps(obj.__globals__[glob])
                 else:
@@ -176,9 +192,30 @@ class JsonSerelizator:
                                   self.loads(code["co_freevars"]),
                                   self.loads(code["co_cellvars"]))
         elif obj['type'] == 'cell':
-            return types.CellType(self.dumps(obj['value']))
+            return types.CellType(self.loads(obj['value']))
         elif obj['type'] == 'class':
             return self.deser_class(obj['value'])
+
+        elif obj["type"] == "staticmethod":
+            return staticmethod(self.loads(obj["value"]))
+
+        elif obj["type"] == "classmethod":
+            return classmethod(self.loads(obj["value"]))
+
+        elif obj["type"] == "object":
+            return self.deser_obj(obj["value"])
+
+    def deser_obj(self, obj):
+        clas = self.loads(obj['__class__'])
+        members = dict()
+
+        for k, v in obj['__members__'].items():
+            members[k] = self.loads(v)
+
+        inf = object.__new__(clas)
+        inf.__dict__ = members
+
+        return inf
 
     def get_PrimType(self, obj, typee):
         if typee == 'int':
@@ -213,7 +250,7 @@ class JsonSerelizator:
         glob_in_func = dict()
         closuree = obj['__closure__']
 
-        for v in globalss:
+        for v in obj["__globals__"]:
 
             if 'module' in v:
                 glob_in_func[globalss[v]['value']] = __import__(globalss[v]['value'])
@@ -259,6 +296,9 @@ class JsonSerelizator:
         for k, member in members.items():
             if isinstance(member, types.FunctionType):
                 member.__globals__.update({clas.__name__: clas})
+
+            elif isinstance(member, (staticmethod, classmethod)):
+                member.__func__.__globals__.update({clas.__name__: clas})
 
         return clas
         
