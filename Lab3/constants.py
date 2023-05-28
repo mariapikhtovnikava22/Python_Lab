@@ -34,3 +34,5 @@ VALUE_RECURSION = r"\{(?:(?R):(?R))?(?:,(?R):(?R))*\}"
 
 VALUE_P = fr"\s*({STR_P}|{FLOAT_P}|{BOOL_P}|{INT_P}|{NONE_P}|{COMPLEX_P}\
                 |{LIST_RECURSION}|{VALUE_RECURSION}\s*)"
+
+BASE_TYPES = r"str|int|float|bool|NoneType|list|dict"

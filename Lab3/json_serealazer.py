@@ -10,7 +10,7 @@ class JsonSerelizator:
         return self.check_value(obj)
 
     def dump(self, obj, file):
-        with open(file, 'w') as filee:
+        with open(file, 'w+') as filee:
             filee.write(self.dumps(obj))
 
     def load(self, file_name):

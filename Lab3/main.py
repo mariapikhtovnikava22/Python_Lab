@@ -18,9 +18,8 @@ class Rectangle:
 
 d = Rectangle(4, 3)
 j = JsonSerelizator()
-d_s = j.dumps(d)
-print(d_s)
-d_ds = j.loads(d_s)
-print(d_ds.area)
+d_s = j.dump(d, "test.json")
+ds_d = j.load("test.json")
+print(ds_d.area)
 
 
