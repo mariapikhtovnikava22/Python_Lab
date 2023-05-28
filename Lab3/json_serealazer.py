@@ -6,7 +6,7 @@ import regex
 
 class JsonSerelizator:
     def dumps(self, obj):
-        obj = Serelizator.dumps(obj)
+        obj = Serelizator.dumpss(obj)
         return self.check_value(obj)
 
     def dump(self, obj, file):
@@ -19,7 +19,7 @@ class JsonSerelizator:
 
     def loads(self, obj):
         obj = self.get_elem(obj)
-        return obj
+        return Serelizator.loadss(obj)
 
     def check_value(self, value):
         if isinstance(value, str):
