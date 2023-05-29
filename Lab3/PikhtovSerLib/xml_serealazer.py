@@ -1,9 +1,9 @@
-from my_serelizator import Serelizator
-from constants import BASE_TYPES
+from PikhtovSerLib.my_serelizator import Serelizator
+from PikhtovSerLib.constants import BASE_TYPES
 import regex
 
 
-class JsonSerelizator:
+class XMLSerelizator:
     key = 'key'
     val = 'value'
     FIND_FOR_XML = fr"\s*(\<(?P<{key}>{BASE_TYPES})\>(?P<{val}>([^<>]*)|(?R)+)\</(?:{BASE_TYPES})\>)\s*"

@@ -1,7 +1,7 @@
 import inspect
 import types
 from re import search
-from constants import PRIMITIVE_COLLECTIONS, PRIMITIVE_DATA, PRIMITIVE_TYPE, \
+from PikhtovSerLib.constants import PRIMITIVE_COLLECTIONS, PRIMITIVE_DATA, PRIMITIVE_TYPE, \
     CODE_OBJ, PRIMITIVE_COLLECTIONS_STR, PRIMITIVE_TYPE_STR
 from inspect import getmembers, isroutine, ismethod, isfunction, isclass
 

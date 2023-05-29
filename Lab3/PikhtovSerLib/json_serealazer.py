@@ -1,5 +1,5 @@
-from my_serelizator import Serelizator
-from constants import INT_P, FLOAT_P, BOOL_P, STR_P, \
+from PikhtovSerLib.my_serelizator import Serelizator
+from PikhtovSerLib.constants import INT_P, FLOAT_P, BOOL_P, STR_P, \
     NONE_P, VALUE_P
 import regex
 
