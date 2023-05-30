@@ -1,8 +1,5 @@
 import argparse
-from PikhtovSerLib import Choice
-
-
-# How to run script from command line input Example: <python videos.py /videos /images>
+from PikhtovSerLib.create_ser import Choice
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Serializer of JSON, XML")
@@ -18,7 +15,7 @@ if __name__ == "__main__":
     from_serializer = Choice.create_serializer(args.format_from)
     to_serializer = Choice.create_serializer(args.format_to)
 
-    with open(args.file_from) as f_file:
+    with open(args.file_from, 'r+') as f_file:
         obj = from_serializer.load(f_file)
 
     print(type(obj), obj)

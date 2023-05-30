@@ -36,10 +36,6 @@ class Serelizator:
             inf['value'] = selff.dumpss(obj.cell_contents)
             return inf
 
-        # elif isinstance(obj, types.GeneratorType):
-        #     inf['type'] = 'generator'
-        #     inf['value'] =
-
         elif isclass(obj):
             inf['type'] = 'class'
             inf['value'] = selff.serealize_Class(obj)
@@ -52,6 +48,11 @@ class Serelizator:
             inf["type"] = "property"
             inf["value"] = selff.serialize_property(obj)
             return inf
+        elif hasattr(obj, "__next__") and hasattr(obj, "__iter__") and callable(obj.__iter__):
+            inf['type'] = 'iterator'
+            inf['value'] = list(map(selff.dumpss, obj))
+            return inf
+
         else:
             inf['type'] = 'object'
             inf['value'] = selff.serelization_Obj(obj)
@@ -225,6 +226,13 @@ class Serelizator:
 
         elif obj["type"] == "property":
             return selff.deser_property(obj)
+
+        elif obj["type"] == "iterator":
+            return selff.deser_iterator(obj)
+
+    def deser_iterator(self, obj):
+        data = obj["value"]
+        return iter(self.loadss(val) for val in data)
 
     def deser_property(self, obj):
         return property(fget=self.loadss(obj["value"]["fget"]),
