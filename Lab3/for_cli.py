@@ -15,10 +15,8 @@ if __name__ == "__main__":
     from_serializer = Choice.create_serializer(args.format_from)
     to_serializer = Choice.create_serializer(args.format_to)
 
-    with open(args.file_from, 'r+') as f_file:
-        obj = from_serializer.load(f_file)
+    obj = from_serializer.load(args.file_from)
 
-    print(type(obj), obj)
+    # print(type(obj), obj)
 
-    with open(args.file_to, "w") as t_file:
-        to_serializer.dump(obj, t_file)
+    to_serializer.dump(obj, args.file_to)

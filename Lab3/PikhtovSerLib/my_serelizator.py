@@ -229,6 +229,8 @@ class Serelizator:
 
         elif obj["type"] == "iterator":
             return selff.deser_iterator(obj)
+        elif obj['type'] == 'NoneType':
+            return
 
     def deser_iterator(self, obj):
         data = obj["value"]
